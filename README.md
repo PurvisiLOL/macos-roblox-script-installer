@@ -1,12 +1,27 @@
-**FPS UNLOCKER & Chrome UI**
+# FPS Unlocker & Chrome UI Setup
 
-# How to setup
+## How to Setup
 
-- Download the `script.sh` file from this repo
-- Go to your Downloads folder and open a terminal in the folder or just do in a terminal ```bash
-cd ./Downloads```
-- Run the script with ```sh
-sh script.sh```
-- Do what you like to do.
+1. **Download the script:**
+   - Download the `script.sh` file from the repository.
 
-## Rerun the script to uninstall parts.
+2. **Navigate to your Downloads folder:**
+   - Open a terminal and navigate to the Downloads folder using the command:
+     ```bash
+     cd ~/Downloads
+     ```
+
+3. **Run the script:**
+   - Execute the script with the following command:
+     ```bash
+     sh script.sh
+     ```
+
+4. **Enjoy:**
+   - Do what you like to do.
+
+## Uninstalling Parts
+
+- To uninstall parts, simply rerun the script using the same command:
+  ```bash
+  sh script.sh
