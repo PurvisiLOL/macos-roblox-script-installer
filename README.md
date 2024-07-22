@@ -2,6 +2,8 @@
 
 ## How to Setup
 
+#### (Tutorial)[https://youtu.be/plxQVwdRXT4]
+
 1. **Download the script:**
    - Download the `script.sh` file from the repository.
 
