@@ -5,6 +5,11 @@ robloxPath="/Applications/Roblox.app"
 clientSettingsPath="$robloxPath/Contents/MacOS/ClientSettings"
 clientSettingsFile="$clientSettingsPath/ClientAppSettings.json"
 backupFile="$clientSettingsPath/ClientAppSettings_backup.json"
+cursorPath="$robloxPath/Contents/Resources/content/textures/Cursors/KeyboardMouse"
+cursorBackupPath="$cursorPath/BackupCursors"
+customCursorsPath="$robloxPath/Contents/Resources/content/textures/Cursors/KeyboardMouse/"
+cursurPath="$robloxPath/Contents/Resources/content/textures/Cursors/KeyboardMouse/CustomCursors"
+replacementCursorpath="$robloxPath/Contents/Resources/content/textures/Cursors/KeyboardMouse/"
 
 center_text() {
   local text="$1"
@@ -14,63 +19,19 @@ center_text() {
   printf "%*s%s\n" $padding "" "$text"
 }
 
-center_rainbow_part() {
-  local non_rainbow_text="$1"
-  local rainbow_part="$2"
-  local width=$(tput cols)
-  local colors=(31 33 32 36 34 35)
-  local color_index=0
-  local rainbow_output=""
-  
-  for ((i=0; i<${#rainbow_part}; i++)); do
-    local char="${rainbow_part:$i:1}"
-    rainbow_output+=$(printf "\e[${colors[$color_index]}m%s\e[0m" "$char")
-    color_index=$(( (color_index + 1) % ${#colors[@]} ))
-  done
-
-  local full_text="${non_rainbow_text}${rainbow_output}"
-
-  local stripped_text="${non_rainbow_text}${rainbow_part}"
-  local text_length=${#stripped_text}
-  local padding=$(( (width - text_length) / 2 ))
-  
-  printf "%*s%s\n" $padding "" "$full_text"
-}
-center_rainbow_text() {
-  local text="$1"
-  local width=$(tput cols)
-  local colors=(31 33 32 36 34 35)
-  local color_index=0
-  local rainbow_output=""
-  
-  local stripped_text=""
-  
-  for ((i=0; i<${#text}; i++)); do
-    local char="${text:$i:1}"
-    rainbow_output+=$(printf "\e[${colors[$color_index]}m%s\e[0m" "$char")
-    stripped_text+="$char"
-    color_index=$(( (color_index + 1) % ${#colors[@]} ))
-  done
-  
-  local text_length=${#stripped_text}
-  local padding=$(( (width - text_length) / 2 ))
-  
-  printf "%*s%s\n" $padding "" "$rainbow_output"
-}
-
 print_header() {
   clear
   tput setaf 15
   
-  center_rainbow_text "███████╗██████╗ ███████╗   ██╗   ██╗██╗"
-  center_rainbow_text "██╔════╝██╔══██╗██╔════╝   ██║   ██║██║"
-  center_rainbow_text "█████╗  ██████╔╝███████╗   ██║   ██║██║"
-  center_rainbow_text "██╔══╝  ██╔═══╝ ╚════██║   ██║   ██║██║"
-  center_rainbow_text "██║     ██║     ███████║██╗╚██████╔╝██║"
-  center_rainbow_text "╚═╝     ╚═╝     ╚══════╝╚═╝ ╚═════╝ ╚═╝"
+  center_text "███████╗██████╗ ███████╗   ██╗   ██╗██╗"
+  center_text "██╔════╝██╔══██╗██╔════╝   ██║   ██║██║"
+  center_text "█████╗  ██████╔╝███████╗   ██║   ██║██║"
+  center_text "██╔══╝  ██╔═══╝ ╚════██║   ██║   ██║██║"
+  center_text "██║     ██║     ███████║██╗╚██████╔╝██║"
+  center_text "╚═╝     ╚═╝     ╚══════╝╚═╝ ╚═════╝ ╚═╝"
   
   center_text "======================================="
-  center_rainbow_part "Made by " "Abyzal"
+  center_text "Made by Abyzal"
   center_text "© 2024 FPS.UI"
   echo
   tput sgr0
@@ -84,6 +45,7 @@ print_menu() {
   printf "%-25s %s\n" "[2] Enable Modern UI" "[7] Delete FFLAGS"
   printf "%-25s %s\n" "[3] Install Both" "[8] Backup FFLAGS"
   printf "%-25s %s\n" "[4] Uninstall Settings" "[9] Use Backup"
+  printf "%-25s %s\n" "[5] Change Cursor" ""
   tput sgr0
   echo ""
   printf "> "
@@ -96,6 +58,22 @@ print_uninstall_menu() {
   echo "[2] Uninstall Modern UI"
   echo "[3] Uninstall Both"
   echo "[4] Back to Main Menu"
+  tput sgr0
+  echo ""
+  printf "> "
+}
+
+print_cursor_menu() {
+  print_header
+  tput setaf 7
+  echo "[1] Old Cursor"
+  echo "[2] Circle"
+  echo "[3] Cross"
+  echo "[4] Cross Squared"
+  echo "[5] Dot"
+  echo "[6] Custom Cursor (Download)"
+  echo "[7] Restore Original"
+  echo "[8] Back to Main Menu"
   tput sgr0
   echo ""
   printf "> "
@@ -260,14 +238,75 @@ use_backup() {
   clear
 }
 
-print_header
-tput setaf 15
-echo "🔄 Initializing setup, please wait..."
-tput sgr0
-if [ "$(id -u)" -ne 0 ]; then
-  tput setaf 9; echo "⚠️  This script must be run with sudo or as root. Otherwise it cannot install or change the FFLAGS."
-  exit 1
-fi
+restore_default_cursor() {
+  if [ -d "$cursorBackupPath" ]; then
+    cp "$cursurPath"/ArrowFarCursor.png "$cursorPath/ArrowFarCursor.png"
+    tput setaf 10; echo "✅ Default cursors have been restored."
+    tput sgr0
+  else
+    tput setaf 9; echo "⚠️ No backup found to restore cursors."
+    tput sgr0
+  fi
+  sleep 2
+  clear
+}
+
+change_cursor() {
+  if [ ! -d "$cursorBackupPath" ]; then
+    mkdir -p "$cursorBackupPath"
+    cp "$cursorPath"/ArrowFarCursor.png "$cursorBackupPath"
+  fi
+
+  if [ -d "$cursurPath" ]; then
+    cp "$customCursorsPath" "$cursorPath/ArrowFarCursor.png"
+    tput setaf 10; echo "✅ Custom cursors have been applied."
+    tput sgr0
+  else
+    tput setaf 9; echo "⚠️ Custom cursors path does not exist."
+    tput sgr0
+  fi
+  customCursorsPath="$replacementCursorpath"
+  sleep 2
+  clear
+}
+
+download_custom_cursors() {
+  clear
+  print_header
+  echo "Enter the URL for the custom cursor file (MUST BE ZIP. IMAGE SIZE MUST BE 64x64 AND NAME MUST BE WITH .PNG AS FILE TYPE: ArrowFarCursor.png ):"
+  printf "> "
+  read customCursorUrl
+  
+  tempCursorFile="custom_cursor.zip"
+  tempUnzipDir="temp_unzip_dir"
+
+  if curl -s -o "$tempCursorFile" "$customCursorUrl"; then
+    if [ -s "$tempCursorFile" ]; then
+      mkdir -p "$tempUnzipDir"
+      
+      unzip -o "$tempCursorFile" -d "$tempUnzipDir"
+      
+      if [ -f "$tempUnzipDir/ArrowFarCursor.png" ]; then
+        cp "$tempUnzipDir/ArrowFarCursor.png" "$cursorPath/ArrowFarCursor.png"
+        tput setaf 10; echo "✅ Custom cursor has been downloaded and applied."
+        tput sgr0
+      else
+        tput setaf 9; echo "⚠️ Expected cursor file not found in the ZIP archive."; tput sgr0
+      fi
+      
+      rm -r "$tempCursorFile" "$tempUnzipDir"
+    else
+      tput setaf 9; echo "⚠️ Downloaded file is empty. Please try again."
+      tput sgr0
+    fi
+  else
+    tput setaf 9; echo "⚠️ Failed to download custom cursor. Please check the URL and try again."
+    tput sgr0
+  fi
+  sleep 2
+  clear
+}
+
 
 url="https://raw.githubusercontent.com/PurvisiLOL/macos-roblox-script-installer/main/fpsunlocker.txt"
 output_file="fpsunlocker.txt"
@@ -296,6 +335,40 @@ if [ ! -d "$robloxPath" ]; then
     exit 1
   fi
 fi
+
+if [ ! -d "$cursurPath" ]; then
+  mkdir "$cursurPath"
+fi
+
+urls=(
+  "https://raw.githubusercontent.com/PurvisiLOL/macos-roblox-script-installer/main/cursurs/cursor.zip"
+  "https://raw.githubusercontent.com/PurvisiLOL/macos-roblox-script-installer/main/cursurs/ArrowFarCursor.png.zip"
+  "https://raw.githubusercontent.com/PurvisiLOL/macos-roblox-script-installer/main/cursurs/og.png.zip"
+)
+
+for url in "${urls[@]}"; do
+  fileName=$(basename "$url")
+
+  curl -s -o "$cursurPath/$fileName" "$url"
+
+  if [ $? -eq 0 ]; then
+    
+    unzip -o "$cursurPath/$fileName" -d "$cursurPath"
+
+    if [ $? -eq 0 ]; then
+    echo 
+    else
+      echo "⚠️ Error code: 56"
+      exit 1
+    fi
+
+    rm "$cursurPath/$fileName"
+  else
+    echo "⚠️ Error code: 56"
+    exit 1
+  fi
+  clear
+done
 
 key_exists() {
   grep -q "$1" "$clientSettingsFile" 2>/dev/null
@@ -350,6 +423,23 @@ while true; do
           2) uninstall_modern_ui ;;
           3) uninstall_both ;;
           4) break ;;
+          *) tput setaf 9; echo "Invalid option, please try again."; tput sgr0; sleep 2; clear ;;
+        esac
+      done
+      ;;
+    5)
+      while true; do
+        print_cursor_menu
+        read cursor_choice
+        case $cursor_choice in
+          1) customCursorsPath="$replacementCursorpath/CustomCursors/Old/ArrowFarCursor.png"; change_cursor ;;
+          2) customCursorsPath="$replacementCursorpath/CustomCursors/Circle/ArrowFarCursor.png"; change_cursor ;;
+          3) customCursorsPath="$replacementCursorpath/CustomCursors/Cross/ArrowFarCursor.png"; change_cursor ;;
+          4) customCursorsPath="$replacementCursorpath/CustomCursors/Cross Squared/ArrowFarCursor.png"; change_cursor ;;
+          5) customCursorsPath="$replacementCursorpath/CustomCursors/Dot/ArrowFarCursor.png"; change_cursor ;;
+          6) download_custom_cursors ;;
+          7) restore_default_cursor ;;
+          8) break ;;
           *) tput setaf 9; echo "Invalid option, please try again."; tput sgr0; sleep 2; clear ;;
         esac
       done
